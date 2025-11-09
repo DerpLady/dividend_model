@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dividend Analyzer - Avanza</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-name {
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .main-content {
+            padding: 40px;
+            display: none;
+        }
+
+        .main-content.active {
+            display: block;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        select, input[type="text"] {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            min-width: 200px;
+            transition: border-color 0.2s;
+        }
+
+        #stockSearchInput {
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #stockFilter {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-top: none;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .top-rank {
+            background: #fef3c7;
+        }
+
+        .top-rank:hover {
+            background: #fde68a;
+        }
+
+        .number {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        .positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .warning-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dividend Analyzer</h1>
+            <p class="subtitle">Analyze your Avanza dividend transactions securely in your browser</p>
+        </header>
+
+        <div class="upload-section" id="uploadSection">
+            <div class="file-input-wrapper">
+                <input type="file" id="csvFile" accept=".csv" />
+                <label for="csvFile" class="file-input-label">Choose CSV File</label>
+            </div>
+            <div class="file-name" id="fileName">No file selected</div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="yearFilter">Filter by Year</label>
+                    <select id="yearFilter">
+                        <option value="all" selected>All Years</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="stockFilter">Filter by Stock</label>
+                    <input type="text" id="stockSearchInput" placeholder="Type to search stocks...">
+                    <select id="stockFilter" size="10">
+                        <option value="all" selected>All Stocks</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="accountFilter">Filter by Account</label>
+                    <select id="accountFilter">
+                        <option value="all">All Accounts</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <div class="section">
+                <h2 class="section-title">Dividend Summary by Year & Stock</h2>
+                <div id="summaryTable"></div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Gross Dividends by Year</h2>
+                <div class="chart-container">
+                    <canvas id="grossChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Net Dividends by Year</h2>
+                <div class="chart-container">
+                    <canvas id="netChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Foreign Tax Analysis</h2>
+                <div id="foreignTaxAnalysis"></div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Dividend Yield Ranking (Current)</h2>
+                <div id="currentYieldTable"></div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Historical Dividend Yield by Year</h2>
+                <div id="historicalYieldTable"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>All data processing happens locally in your browser. No data is transmitted to any server.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Global data storage
+        let allData = {
+            raw: [],
+            dividends: [],
+            summary: {},
+            yearlyGross: {},
+            yearlyNet: {},
+            stocks: new Set(),
+            years: new Set(),
+            accounts: new Set()
+        };
+
+        // File upload handler
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+                readCSV(file);
+            }
+        });
+
+        // Parse CSV file
+        function readCSV(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // CSV Parser (handles BOM, semicolon delimiter, empty fields)
+        function parseCSV(text) {
+            // Remove BOM if present
+            text = text.replace(/^\ufeff/, '');
+
+            const lines = text.split('\n').filter(line => line.trim());
+            if (lines.length === 0) return;
+
+            // Parse header - remove any BOM characters
+            const headers = lines[0].split(';').map(h => h.replace(/^\ufeff/, '').trim());
+
+            console.log('CSV Headers:', headers);
+            console.log('Expected columns:', headers.length);
+
+            // Parse rows
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // Split by semicolon - this preserves empty fields
+                const values = line.split(';');
+
+                // Only process rows with correct number of columns (or close to it)
+                // Some rows might have trailing empty fields
+                if (values.length >= headers.length - 2) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        // Get value or empty string if beyond array length
+                        row[header] = (values[index] || '').trim();
+                    });
+                    rows.push(row);
+                } else {
+                    console.warn(`Row ${i} has ${values.length} columns, expected ${headers.length}:`, line.substring(0, 100));
+                }
+            }
+
+            console.log(`Parsed ${rows.length} rows from CSV`);
+            allData.raw = rows;
+            processData();
+        }
+
+        // Process dividend data
+        function processData() {
+            const dividendTypes = ['Utdelning', 'Utdelningar'];
+            const taxTypes = ['Preliminärskatt utdelning', 'Prelskatt utdelning', 'Preliminärskatt utdelningar', 'Prelskatt utdelningar'];
+            const foreignTaxType = 'Utländsk källskatt';
+
+            // Filter dividend-related transactions
+            const dividendRows = allData.raw.filter(row => {
+                const type = row['Typ av transaktion'];
+                return dividendTypes.includes(type) ||
+                       taxTypes.includes(type) ||
+                       type === foreignTaxType;
+            });
+
+            // Group by event (Date, Account, ISIN)
+            const events = {};
+
+            dividendRows.forEach(row => {
+                const date = row['Datum'];
+                const account = row['Konto'] || 'Unknown Account';
+                const isin = row['ISIN'];
+                const type = row['Typ av transaktion'];
+                const amount = parseFloat(row['Belopp'].replace(',', '.')) || 0;
+                const stock = row['Värdepapper/beskrivning'];
+
+                const key = `${date}|${account}|${isin}`;
+
+                if (!events[key]) {
+                    events[key] = {
+                        date: date,
+                        account: account,
+                        isin: isin,
+                        stock: '',
+                        gross: 0,
+                        taxSwedish: 0,
+                        taxForeign: 0
+                    };
+                }
+
+                // Always update stock name if we have one
+                if (stock) events[key].stock = stock;
+
+                if (dividendTypes.includes(type)) {
+                    events[key].gross += amount;
+                } else if (taxTypes.includes(type)) {
+                    events[key].taxSwedish += Math.abs(amount);
+                } else if (type === foreignTaxType) {
+                    events[key].taxForeign += Math.abs(amount);
+                }
+            });
+
+            // Convert to array and calculate net
+            allData.dividends = Object.values(events)
+                .filter(e => e.stock && e.gross > 0)
+                .map(e => {
+                    // Net = Gross - Swedish tax only (foreign tax can be reclaimed)
+                    e.net = e.gross - e.taxSwedish;
+                    e.year = e.date.substring(0, 4);
+                    e.country = e.isin.substring(0, 2) === 'SE' ? 'Sweden' : 'Foreign';
+                    e.countryCode = e.isin.substring(0, 2);
+                    return e;
+                });
+
+            // Build filter data
+            allData.dividends.forEach(d => {
+                allData.stocks.add(d.stock);
+                allData.years.add(d.year);
+                allData.accounts.add(d.account);
+            });
+
+            calculatePositions();
+            calculateSummaries();
+            populateFilters();
+            renderAll();
+
+            // Show main content
+            document.getElementById('mainContent').classList.add('active');
+        }
+
+        // Calculate positions over time from buy/sell transactions
+        function calculatePositions() {
+            // Store all transactions (including dividends) sorted by date
+            const transactions = [];
+
+            allData.raw.forEach(row => {
+                const type = row['Typ av transaktion'];
+                const stock = row['Värdepapper/beskrivning'];
+                const isin = row['ISIN'];
+                const date = row['Datum'];
+                const antal = parseFloat(row['Antal']) || 0;
+                const belopp = parseFloat(row['Belopp'].replace(',', '.')) || 0;
+
+                // Collect buy/sell transactions
+                if ((type === 'Köp' || type === 'Sälj') && stock && isin && antal !== 0) {
+                    transactions.push({
+                        date: date,
+                        year: date.substring(0, 4),
+                        type: type,
+                        stock: stock,
+                        isin: isin,
+                        antal: antal,
+                        belopp: belopp
+                    });
+                }
+                // Also collect dividend dates to snapshot positions
+                else if ((type === 'Utdelning' || type === 'Utdelningar') && isin) {
+                    transactions.push({
+                        date: date,
+                        year: date.substring(0, 4),
+                        type: 'Dividend',
+                        stock: stock,
+                        isin: isin,
+                        antal: 0,
+                        belopp: belopp
+                    });
+                }
+            });
+
+            // Sort by date
+            transactions.sort((a, b) => a.date.localeCompare(b.date));
+
+            // Track positions per ISIN over time with snapshots at dividend dates
+            const positionHistory = {};
+
+            transactions.forEach(tx => {
+                if (!positionHistory[tx.isin]) {
+                    positionHistory[tx.isin] = {
+                        stock: tx.stock,
+                        isin: tx.isin,
+                        shares: 0,
+                        totalCost: 0,
+                        dividendDatePositions: {} // Track position at each dividend payment date
+                    };
+                }
+
+                const pos = positionHistory[tx.isin];
+
+                if (tx.type === 'Köp') {
+                    pos.shares += tx.antal;
+                    pos.totalCost += Math.abs(tx.belopp);
+                } else if (tx.type === 'Sälj') {
+                    const sharesBeforeSell = pos.shares;
+                    pos.shares += tx.antal; // antal is negative for sells
+
+                    // Reduce cost basis proportionally
+                    if (sharesBeforeSell > 0) {
+                        const sellRatio = Math.abs(tx.antal) / sharesBeforeSell;
+                        pos.totalCost *= (1 - sellRatio);
+                    }
+                } else if (tx.type === 'Dividend') {
+                    // Snapshot position at dividend payment date
+                    const key = `${tx.year}|${tx.date}`;
+                    pos.dividendDatePositions[key] = {
+                        date: tx.date,
+                        year: tx.year,
+                        shares: pos.shares,
+                        totalCost: pos.totalCost
+                    };
+                }
+            });
+
+            // Store current positions
+            allData.positions = Object.values(positionHistory)
+                .filter(p => p.shares > 0.01)
+                .map(p => {
+                    p.avgPrice = p.totalCost / p.shares;
+                    p.currentValue = p.totalCost;
+                    return p;
+                });
+
+            allData.positionHistory = positionHistory;
+            console.log('Calculated position history:', allData.positionHistory);
+        }
+
+        // Calculate summaries
+        function calculateSummaries() {
+            // Yearly totals
+            allData.yearlyGross = {};
+            allData.yearlyNet = {};
+
+            allData.dividends.forEach(d => {
+                if (!allData.yearlyGross[d.year]) {
+                    allData.yearlyGross[d.year] = 0;
+                    allData.yearlyNet[d.year] = 0;
+                }
+                allData.yearlyGross[d.year] += d.gross;
+                allData.yearlyNet[d.year] += d.net;
+            });
+
+            // Overall stats
+            allData.summary.totalGross = Object.values(allData.yearlyGross).reduce((a, b) => a + b, 0);
+            allData.summary.totalNet = Object.values(allData.yearlyNet).reduce((a, b) => a + b, 0);
+            allData.summary.totalTaxSwedish = allData.dividends.reduce((sum, d) => sum + d.taxSwedish, 0);
+            allData.summary.totalTaxForeign = allData.dividends.reduce((sum, d) => sum + d.taxForeign, 0);
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const yearFilter = document.getElementById('yearFilter');
+            const stockFilter = document.getElementById('stockFilter');
+            const accountFilter = document.getElementById('accountFilter');
+            const stockSearchInput = document.getElementById('stockSearchInput');
+
+            // Years
+            [...allData.years].sort().reverse().forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearFilter.appendChild(option);
+            });
+
+            // Stocks - store all stocks for search
+            allData.stocksList = [...allData.stocks].sort();
+            updateStockFilterOptions();
+
+            // Accounts
+            [...allData.accounts].sort().forEach(account => {
+                const option = document.createElement('option');
+                option.value = account;
+                option.textContent = account;
+                accountFilter.appendChild(option);
+            });
+
+            // Add filter event listeners
+            yearFilter.addEventListener('change', renderSummaryTableOnly);
+            stockFilter.addEventListener('change', renderSummaryTableOnly);
+            accountFilter.addEventListener('change', renderSummaryTableOnly);
+
+            // Add stock search functionality
+            stockSearchInput.addEventListener('input', function() {
+                updateStockFilterOptions(this.value.toLowerCase());
+            });
+        }
+
+        // Update stock filter options based on search
+        function updateStockFilterOptions(searchTerm = '') {
+            const stockFilter = document.getElementById('stockFilter');
+            const currentSelection = stockFilter.value;
+
+            // Clear current options
+            stockFilter.innerHTML = '<option value="all">All Stocks</option>';
+
+            // Filter and add stocks
+            const filteredStocks = searchTerm
+                ? allData.stocksList.filter(stock => stock.toLowerCase().includes(searchTerm))
+                : allData.stocksList;
+
+            filteredStocks.forEach(stock => {
+                const option = document.createElement('option');
+                option.value = stock;
+                option.textContent = stock;
+                stockFilter.appendChild(option);
+            });
+
+            // Restore previous selection if it still exists
+            if (currentSelection && Array.from(stockFilter.options).some(opt => opt.value === currentSelection)) {
+                stockFilter.value = currentSelection;
+            } else {
+                stockFilter.value = 'all';
+            }
+        }
+
+        // Get filtered data (for summary table only)
+        function getFilteredData() {
+            const yearFilterValue = document.getElementById('yearFilter').value;
+            const stockFilterValue = document.getElementById('stockFilter').value;
+            const accountFilterValue = document.getElementById('accountFilter').value;
+
+            return allData.dividends.filter(d => {
+                // Year filter
+                if (yearFilterValue !== 'all' && d.year !== yearFilterValue) return false;
+
+                // Stock filter
+                if (stockFilterValue !== 'all' && d.stock !== stockFilterValue) return false;
+
+                // Account filter
+                if (accountFilterValue !== 'all' && d.account !== accountFilterValue) return false;
+
+                return true;
+            });
+        }
+
+        // Render all visualizations (called on initial data load)
+        function renderAll() {
+            // Use all data (no filters) for charts, stats, and ranking tables
+            const allDataArray = allData.dividends;
+            renderStats(allDataArray);
+            renderSummaryTable(getFilteredData()); // Only summary table uses filters
+            renderGrossChart(allDataArray);
+            renderNetChart(allDataArray);
+            renderForeignTaxAnalysis(allDataArray);
+            renderCurrentYieldTable(allDataArray);
+            renderHistoricalYieldTable(allDataArray);
+        }
+
+        // Render only summary table (called when filters change)
+        function renderSummaryTableOnly() {
+            const filteredData = getFilteredData();
+            renderStats(filteredData);
+            renderSummaryTable(filteredData);
+            renderForeignTaxAnalysis(filteredData);
+        }
+
+        // Render stats cards
+        function renderStats(data) {
+            const totalGross = data.reduce((sum, d) => sum + d.gross, 0);
+            const totalNet = data.reduce((sum, d) => sum + d.net, 0);
+            const totalTaxSwedish = data.reduce((sum, d) => sum + d.taxSwedish, 0);
+            const totalTaxForeign = data.reduce((sum, d) => sum + d.taxForeign, 0);
+
+            const html = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Gross Dividends</div>
+                    <div class="stat-value">${formatCurrency(totalGross)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Net Dividends</div>
+                    <div class="stat-value">${formatCurrency(totalNet)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Swedish Tax</div>
+                    <div class="stat-value">${formatCurrency(totalTaxSwedish)}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Foreign Tax</div>
+                    <div class="stat-value">${formatCurrency(totalTaxForeign)}</div>
+                </div>
+            `;
+            document.getElementById('statsGrid').innerHTML = html;
+        }
+
+        // Calculate dividend yield for a stock in a specific year
+        function calculateDividendYield(isin, rowYear, selectedYears) {
+            const posHistory = allData.positionHistory[isin];
+            if (!posHistory) {
+                console.log(`No position history for ISIN ${isin}`);
+                return 0;
+            }
+
+            // Get all dividends for this stock in this year
+            const yearDividends = allData.dividends.filter(d => d.isin === isin && d.year === rowYear);
+            if (yearDividends.length === 0) return 0;
+
+            // Calculate total dividends
+            const totalDividends = yearDividends.reduce((sum, d) => sum + d.gross, 0);
+
+            // Get position snapshots at dividend dates for this year
+            const yearPositions = Object.values(posHistory.dividendDatePositions)
+                .filter(p => p.year === rowYear);
+
+            if (yearPositions.length === 0) {
+                console.log(`No dividend-date positions for ${posHistory.stock} in ${rowYear}`);
+                return 0;
+            }
+
+            // Use average position cost over the year (or first position if same throughout)
+            const avgCost = yearPositions.reduce((sum, p) => sum + p.totalCost, 0) / yearPositions.length;
+            const avgShares = yearPositions.reduce((sum, p) => sum + p.shares, 0) / yearPositions.length;
+
+            if (avgCost === 0 || avgShares <= 0) {
+                console.log(`${posHistory.stock} in ${rowYear}: avgCost=${avgCost}, avgShares=${avgShares}`);
+                return 0;
+            }
+
+            // Calculate yield = (Annual dividends / Average cost basis) * 100
+            const yield_pct = (totalDividends / avgCost) * 100;
+            console.log(`${posHistory.stock} ${rowYear}: dividends=${totalDividends}, avgCost=${avgCost}, yield=${yield_pct.toFixed(2)}%`);
+            return yield_pct;
+        }
+
+        // Render summary table
+        function renderSummaryTable(data) {
+            // Group by year, stock, and ISIN
+            const grouped = {};
+            data.forEach(d => {
+                const key = `${d.year}|${d.isin}`;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        year: d.year,
+                        stock: d.stock,
+                        isin: d.isin,
+                        countryCode: d.countryCode,
+                        gross: 0,
+                        taxSwedish: 0,
+                        taxForeign: 0,
+                        net: 0
+                    };
+                }
+                grouped[key].gross += d.gross;
+                grouped[key].taxSwedish += d.taxSwedish;
+                grouped[key].taxForeign += d.taxForeign;
+                grouped[key].net += d.net;
+            });
+
+            const rows = Object.values(grouped).map(row => {
+                // Calculate dividend yield based on year
+                row.dividendYield = calculateDividendYield(row.isin, row.year, [row.year]);
+                return row;
+            }).sort((a, b) => {
+                if (a.year !== b.year) return b.year.localeCompare(a.year);
+                return b.gross - a.gross; // Sort by gross descending within year
+            });
+
+            let html = `
+                <table id="dividendTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Year ▼</th>
+                            <th onclick="sortTable(1)">Country</th>
+                            <th onclick="sortTable(2)">Stock ▼</th>
+                            <th class="number" onclick="sortTable(3)">Gross (SEK) ▼</th>
+                            <th class="number" onclick="sortTable(4)">Swedish Tax ▼</th>
+                            <th class="number" onclick="sortTable(5)">Foreign Tax ▼</th>
+                            <th class="number" onclick="sortTable(6)">Net SWE tax (SEK) ▼</th>
+                            <th class="number" onclick="sortTable(7)">Div Yield % ▼</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            rows.forEach(row => {
+                const flag = getCountryFlag(row.countryCode);
+                html += `
+                    <tr>
+                        <td>${row.year}</td>
+                        <td style="font-size: 1.5em">${flag}</td>
+                        <td>${row.stock}</td>
+                        <td class="number positive">${formatCurrency(row.gross)}</td>
+                        <td class="number negative">${formatCurrency(row.taxSwedish)}</td>
+                        <td class="number negative">${formatCurrency(row.taxForeign)}</td>
+                        <td class="number positive">${formatCurrency(row.net)}</td>
+                        <td class="number ${row.dividendYield > 0 ? 'positive' : ''}">${row.dividendYield > 0 ? row.dividendYield.toFixed(2) + '%' : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('summaryTable').innerHTML = html;
+        }
+
+        // Get country flag emoji from country code
+        function getCountryFlag(countryCode) {
+            const flags = {
+                'SE': '🇸🇪', // Sweden
+                'US': '🇺🇸', // USA
+                'NO': '🇳🇴', // Norway
+                'FI': '🇫🇮', // Finland
+                'DK': '🇩🇰', // Denmark
+                'DE': '🇩🇪', // Germany
+                'GB': '🇬🇧', // UK
+                'FR': '🇫🇷', // France
+                'NL': '🇳🇱', // Netherlands
+                'CH': '🇨🇭', // Switzerland
+                'CA': '🇨🇦', // Canada
+                'JP': '🇯🇵', // Japan
+                'CN': '🇨🇳', // China
+                'HK': '🇭🇰', // Hong Kong
+                'AU': '🇦🇺', // Australia
+                'IT': '🇮🇹', // Italy
+                'ES': '🇪🇸', // Spain
+                'BE': '🇧🇪', // Belgium
+                'AT': '🇦🇹', // Austria
+                'IE': '🇮🇪'  // Ireland
+            };
+            return flags[countryCode] || '🏳️';
+        }
+
+        // Sort table by column
+        let sortDirection = {};
+        function sortTable(columnIndex) {
+            const table = document.getElementById('dividendTable');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+
+            // Toggle sort direction
+            sortDirection[columnIndex] = !sortDirection[columnIndex];
+            const ascending = sortDirection[columnIndex];
+
+            rows.sort((a, b) => {
+                const aValue = a.getElementsByTagName('td')[columnIndex].textContent;
+                const bValue = b.getElementsByTagName('td')[columnIndex].textContent;
+
+                // Try to parse as number
+                const aNum = parseFloat(aValue.replace(/[^0-9.-]/g, ''));
+                const bNum = parseFloat(bValue.replace(/[^0-9.-]/g, ''));
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return ascending ? aNum - bNum : bNum - aNum;
+                } else {
+                    return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+                }
+            });
+
+            // Rebuild table
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Render gross chart
+        function renderGrossChart(data) {
+            const yearlyData = {};
+            data.forEach(d => {
+                yearlyData[d.year] = (yearlyData[d.year] || 0) + d.gross;
+            });
+
+            const years = Object.keys(yearlyData).sort();
+            const values = years.map(y => yearlyData[y]);
+
+            drawBarChart('grossChart', years, values, 'Gross Dividends (SEK)', '#10b981');
+        }
+
+        // Render net chart
+        function renderNetChart(data) {
+            const yearlyData = {};
+            data.forEach(d => {
+                yearlyData[d.year] = (yearlyData[d.year] || 0) + d.net;
+            });
+
+            const years = Object.keys(yearlyData).sort();
+            const values = years.map(y => yearlyData[y]);
+
+            drawBarChart('netChart', years, values, 'Net Dividends (SEK)', '#667eea');
+        }
+
+        // Draw bar chart using Canvas
+        function drawBarChart(canvasId, labels, values, title, color) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size
+            canvas.width = 800;
+            canvas.height = 400;
+
+            const padding = 60;
+            const chartWidth = canvas.width - 2 * padding;
+            const chartHeight = canvas.height - 2 * padding;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (values.length === 0) {
+                ctx.font = '16px sans-serif';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data to display', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // Find max value
+            const maxValue = Math.max(...values);
+            const scale = chartHeight / maxValue;
+
+            // Draw bars
+            const barWidth = chartWidth / values.length * 0.7;
+            const gap = chartWidth / values.length * 0.3;
+
+            values.forEach((value, index) => {
+                const barHeight = value * scale;
+                const x = padding + index * (barWidth + gap);
+                const y = padding + chartHeight - barHeight;
+
+                // Draw bar
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y, barWidth, barHeight);
+
+                // Draw value on top
+                ctx.fillStyle = '#333';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(formatCurrency(value), x + barWidth / 2, y - 5);
+
+                // Draw label
+                ctx.fillText(labels[index], x + barWidth / 2, canvas.height - padding + 20);
+            });
+
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, padding + chartHeight);
+            ctx.lineTo(padding + chartWidth, padding + chartHeight);
+            ctx.stroke();
+
+            // Draw title
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, canvas.width / 2, 30);
+        }
+
+        // Render foreign tax analysis
+        function renderForeignTaxAnalysis(data) {
+            const foreignDividends = data.filter(d => d.country === 'Foreign');
+            const totalForeignTax = foreignDividends.reduce((sum, d) => sum + d.taxForeign, 0);
+
+            // Group by stock
+            const byStock = {};
+            foreignDividends.forEach(d => {
+                if (!byStock[d.stock]) {
+                    byStock[d.stock] = {
+                        stock: d.stock,
+                        gross: 0,
+                        taxForeign: 0
+                    };
+                }
+                byStock[d.stock].gross += d.gross;
+                byStock[d.stock].taxForeign += d.taxForeign;
+            });
+
+            const rows = Object.values(byStock).sort((a, b) => b.taxForeign - a.taxForeign);
+
+            let html = `
+                <div class="warning">
+                    <div class="warning-title">Total Foreign Tax Paid: ${formatCurrency(totalForeignTax)}</div>
+                    <p>This amount may be eligible for tax credit (ROT-avdrag) on your Swedish tax return.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Stock</th>
+                            <th class="number">Gross Dividends (SEK)</th>
+                            <th class="number">Foreign Tax Paid (SEK)</th>
+                            <th class="number">Tax Rate (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            rows.forEach(row => {
+                const taxRate = (row.taxForeign / row.gross * 100).toFixed(1);
+                html += `
+                    <tr>
+                        <td>${row.stock}</td>
+                        <td class="number positive">${formatCurrency(row.gross)}</td>
+                        <td class="number negative">${formatCurrency(row.taxForeign)}</td>
+                        <td class="number">${taxRate}%</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('foreignTaxAnalysis').innerHTML = html;
+        }
+
+        // Render current yield ranking table
+        function renderCurrentYieldTable(data) {
+            // Get the most recent year from filtered data
+            const years = [...new Set(data.map(d => d.year))].sort();
+            if (years.length === 0) {
+                document.getElementById('currentYieldTable').innerHTML = '<p>No data available</p>';
+                return;
+            }
+
+            const currentYear = years[years.length - 1];
+
+            // Group by ISIN for the current year
+            const grouped = {};
+            data.filter(d => d.year === currentYear).forEach(d => {
+                const key = d.isin;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        stock: d.stock,
+                        isin: d.isin,
+                        countryCode: d.countryCode,
+                        year: d.year,
+                        gross: 0
+                    };
+                }
+                grouped[key].gross += d.gross;
+            });
+
+            // Calculate yield for each stock and sort by yield descending
+            const rows = Object.values(grouped)
+                .map(row => {
+                    row.dividendYield = calculateDividendYield(row.isin, row.year, [row.year]);
+
+                    // Get cost basis for display
+                    const posHistory = allData.positionHistory[row.isin];
+                    if (posHistory) {
+                        const yearPositions = Object.values(posHistory.dividendDatePositions)
+                            .filter(p => p.year === row.year);
+                        if (yearPositions.length > 0) {
+                            row.costBasis = yearPositions.reduce((sum, p) => sum + p.totalCost, 0) / yearPositions.length;
+                        } else {
+                            row.costBasis = 0;
+                        }
+                    } else {
+                        row.costBasis = 0;
+                    }
+
+                    return row;
+                })
+                .filter(row => row.dividendYield > 0)
+                .sort((a, b) => b.dividendYield - a.dividendYield);
+
+            let html = `
+                <p style="margin-bottom: 20px; color: #666;">Showing dividend yield ranking for <strong>${currentYear}</strong> (most recent year with data). Yield = (Gross Dividends / Cost Basis) × 100%</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Country</th>
+                            <th>Stock</th>
+                            <th class="number">Gross Div (SEK)</th>
+                            <th class="number">Cost Basis (SEK)</th>
+                            <th class="number">Yield %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            rows.forEach((row, index) => {
+                const flag = getCountryFlag(row.countryCode);
+                const rankClass = index < 3 ? 'top-rank' : '';
+                html += `
+                    <tr class="${rankClass}">
+                        <td><strong>${index + 1}</strong></td>
+                        <td style="font-size: 1.5em">${flag}</td>
+                        <td>${row.stock}</td>
+                        <td class="number positive">${formatCurrency(row.gross)}</td>
+                        <td class="number">${formatCurrency(row.costBasis)}</td>
+                        <td class="number positive"><strong>${row.dividendYield.toFixed(2)}%</strong></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('currentYieldTable').innerHTML = html;
+        }
+
+        // Render historical yield table (year-by-year breakdown)
+        function renderHistoricalYieldTable(data) {
+            // Group by year and ISIN
+            const yearStockData = {};
+
+            data.forEach(d => {
+                const yearKey = d.year;
+                if (!yearStockData[yearKey]) {
+                    yearStockData[yearKey] = {};
+                }
+
+                const isinKey = d.isin;
+                if (!yearStockData[yearKey][isinKey]) {
+                    yearStockData[yearKey][isinKey] = {
+                        stock: d.stock,
+                        isin: d.isin,
+                        countryCode: d.countryCode,
+                        year: d.year,
+                        gross: 0
+                    };
+                }
+                yearStockData[yearKey][isinKey].gross += d.gross;
+            });
+
+            // Build table with years as columns
+            const years = Object.keys(yearStockData).sort();
+            if (years.length === 0) {
+                document.getElementById('historicalYieldTable').innerHTML = '<p>No data available</p>';
+                return;
+            }
+
+            // Get all unique stocks across all years
+            const allStocks = new Map();
+            years.forEach(year => {
+                Object.values(yearStockData[year]).forEach(stock => {
+                    if (!allStocks.has(stock.isin)) {
+                        allStocks.set(stock.isin, {
+                            stock: stock.stock,
+                            isin: stock.isin,
+                            countryCode: stock.countryCode
+                        });
+                    }
+                });
+            });
+
+            // Calculate yield for each stock-year combination
+            const stocksArray = Array.from(allStocks.values());
+
+            let html = `
+                <p style="margin-bottom: 20px; color: #666;">Historical dividend yield per stock by year. Yield = (Gross Dividends / Cost Basis at dividend dates) × 100%</p>
+                <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>Stock</th>
+            `;
+
+            // Add year columns
+            years.forEach(year => {
+                html += `<th class="number">${year} Yield %</th>`;
+            });
+
+            html += `
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Add rows for each stock
+            stocksArray.forEach(stockInfo => {
+                const flag = getCountryFlag(stockInfo.countryCode);
+                html += `
+                    <tr>
+                        <td style="font-size: 1.5em">${flag}</td>
+                        <td>${stockInfo.stock}</td>
+                `;
+
+                years.forEach(year => {
+                    const yearData = yearStockData[year][stockInfo.isin];
+                    if (yearData) {
+                        const yieldPct = calculateDividendYield(stockInfo.isin, year, [year]);
+                        if (yieldPct > 0) {
+                            html += `<td class="number positive">${yieldPct.toFixed(2)}%</td>`;
+                        } else {
+                            html += `<td class="number">-</td>`;
+                        }
+                    } else {
+                        html += `<td class="number">-</td>`;
+                    }
+                });
+
+                html += `</tr>`;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+                </div>
+            `;
+
+            document.getElementById('historicalYieldTable').innerHTML = html;
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('sv-SE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>

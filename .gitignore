@@ -1,0 +1,47 @@
+# Personal financial data - NEVER commit these files
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite
+*.sqlite3
+
+# Old Python files with personal paths
+old_files/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+build/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+nul
+
+# Local configuration
+.claude/settings.local.json
+
+# Test files with data
+test_all_phases.html
+
+# Documentation (keep for local use only)
+docs/
+
+# Logs
+logs/
+*.log
