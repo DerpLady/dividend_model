@@ -36,12 +36,10 @@ nul
 # Local configuration
 .claude/settings.local.json
 
-# Test files with data
-test_all_phases.html
-
 # Documentation (keep for local use only)
 docs/
 
 # Logs
 logs/
 *.log
+

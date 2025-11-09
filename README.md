@@ -1,11 +1,16 @@
 # Dividend Model
 
-A web-based dividend calculator for analyzing and visualizing dividend income from stock portfolios.
+A web-based dividend calculator for analyzing and visualizing dividend income using an exported .csv file from Avanza. 
+
+![Dividend Analyzer Screenshot](image.png)
+
+> [!WARNING]
+> Note that the model only works for the Avanza .csv exports.
 
 ## Features
 
-- **Upload Transaction Data**: Import your dividend transactions from CSV files
-- **Interactive Visualization**: View dividend income trends over time with interactive charts
+- **Upload transaction data**: Import your dividend transactions csv file
+- **Interactive Vvisualization**: View dividend income trends over time with interactive charts
 - **Detailed Analysis**: See breakdowns by stock, year, and account
 - **Tax Calculations**: Automatic calculation of Swedish and foreign taxes
 - **Privacy-First**: All processing happens locally in your browser - no data is sent to any server
@@ -43,4 +48,4 @@ MIT License - Feel free to use and modify for your own purposes.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Contributions are welcome! Please feel free to submit issues or pull requests. I will reserve the right not to accept them though 😉
