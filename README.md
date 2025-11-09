@@ -10,7 +10,7 @@ A web-based dividend calculator for analyzing and visualizing dividend income us
 ## Features
 
 - **Upload transaction data**: Import your dividend transactions csv file
-- **Interactive Vvisualization**: View dividend income trends over time with interactive charts
+- **Interactive visualization**: View dividend income trends over time with interactive charts
 - **Detailed Analysis**: See breakdowns by stock, year, and account
 - **Tax Calculations**: Automatic calculation of Swedish and foreign taxes
 - **Privacy-First**: All processing happens locally in your browser - no data is sent to any server
