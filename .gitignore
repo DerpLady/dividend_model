@@ -27,6 +27,7 @@ venv/
 *.egg-info/
 build/
 dist/
+.py
 
 # OS files
 .DS_Store
