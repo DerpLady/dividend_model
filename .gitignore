@@ -43,3 +43,6 @@ docs/
 logs/
 *.log
 
+# Other
+claude.exe
+
