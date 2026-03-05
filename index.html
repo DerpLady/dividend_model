@@ -290,9 +290,9 @@
             <div class="filters">
                 <div class="filter-group">
                     <label for="yearFilter">Filter by Year</label>
-                    <select id="yearFilter">
-                        <option value="all" selected>All Years</option>
+                    <select id="yearFilter" multiple size="6">
                     </select>
+                    <small style="color: #888;">Ctrl+click to select multiple</small>
                 </div>
                 <div class="filter-group">
                     <label for="stockFilter">Filter by Stock</label>
@@ -628,13 +628,15 @@
             const accountFilter = document.getElementById('accountFilter');
             const stockSearchInput = document.getElementById('stockSearchInput');
 
-            // Years
+            // Years (all selected by default = no filter)
             [...allData.years].sort().reverse().forEach(year => {
                 const option = document.createElement('option');
                 option.value = year;
                 option.textContent = year;
                 yearFilter.appendChild(option);
             });
+            // Adjust size to fit available years (max 6)
+            yearFilter.size = Math.min(6, allData.years.size);
 
             // Stocks - store all stocks for search
             allData.stocksList = [...allData.stocks].sort();
@@ -689,13 +691,14 @@
 
         // Get filtered data (for summary table only)
         function getFilteredData() {
-            const yearFilterValue = document.getElementById('yearFilter').value;
+            const yearFilter = document.getElementById('yearFilter');
+            const selectedYears = [...yearFilter.selectedOptions].map(o => o.value);
             const stockFilterValue = document.getElementById('stockFilter').value;
             const accountFilterValue = document.getElementById('accountFilter').value;
 
             return allData.dividends.filter(d => {
-                // Year filter
-                if (yearFilterValue !== 'all' && d.year !== yearFilterValue) return false;
+                // Year filter (empty selection = all years)
+                if (selectedYears.length > 0 && !selectedYears.includes(d.year)) return false;
 
                 // Stock filter
                 if (stockFilterValue !== 'all' && d.stock !== stockFilterValue) return false;
