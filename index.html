@@ -478,7 +478,11 @@
 
             // Convert to array and calculate net
             allData.dividends = Object.values(events)
-                .filter(e => e.stock && e.gross > 0)
+                // Keep events with a non-zero dividend (positive payments AND negative
+                // reversals/corrections). Using `> 0` here silently dropped reversal rows
+                // instead of subtracting them, inflating the gross total. Pure tax-only
+                // events (gross === 0) are still excluded.
+                .filter(e => e.stock && e.gross !== 0)
                 .map(e => {
                     // Net = Gross - Swedish tax only (foreign tax can be reclaimed)
                     e.net = e.gross - e.taxSwedish;
